@@ -63,19 +63,7 @@ pipeline{
             }
         }
         
-        stage('8.0 Deploy to kubernets'){
-            steps{
-                script{
-                    dir('Kubernetes') {
-                        withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'spjt', namespace: 'netflzapp', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
-                                sh 'kubectl apply -f /root/appnode/workspace/netflzapp/deployment.yml -n netflzapp'
-                                sh 'kubectl get po -n netflzapp'
-                                sh 'kubectl get svc  -n netflzapp'
-                        }   
-                    }
-                }
-            }
-        }
+        
         stage('9.0clean workspace'){
             steps{
                 cleanWs()
@@ -84,14 +72,26 @@ pipeline{
 
     }
     post {
-     always {
+    always {
         emailext attachLog: true,
             subject: "'${currentBuild.result}'",
-            body: "Project: ${env.JOB_NAME}<br/>" +
-                "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                "URL: ${env.BUILD_URL}<br/>",
-            to: 'deniferdavies@gmail.com', 
-            attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+            body: """
+                <html>
+                <body>
+                    <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
+                        <p style="color: white; font-weight: bold;">Project: ${env.JOB_NAME}</p>
+                    </div>
+                    <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
+                        <p style="color: white; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                    </div>
+                    <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
+                        <p style="color: white; font-weight: bold;">URL: ${env.BUILD_URL}</p>
+                    </div>
+                </body>
+                </html>
+            """,
+            to: 'deniferdavies@gmail.com', 'mokeleke@gmail.com'
+            mimeType: 'text/html'
         }
     }
         
